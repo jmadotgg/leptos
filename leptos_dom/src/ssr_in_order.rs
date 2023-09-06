@@ -13,7 +13,7 @@ use itertools::Itertools;
 use leptos_reactive::{
     create_runtime, suspense::StreamChunk, Oco, RuntimeId, SharedContext,
 };
-use std::{collections::VecDeque};
+use std::collections::VecDeque;
 
 /// Renders a view to HTML, waiting to return until all `async` [Resource](leptos_reactive::Resource)s
 /// loaded in `<Suspense/>` elements have finished loading.
