@@ -1123,7 +1123,6 @@ impl Runtime {
     }
 
     /// Returns IDs for all [`Resource`](crate::Resource)s found on any scope.
-    #[cfg(any(feature = "ssr", feature = "hydrate"))]
     pub(crate) fn all_resources(&self) -> Vec<ResourceId> {
         self.resources
             .borrow()
@@ -1134,7 +1133,6 @@ impl Runtime {
 
     /// Returns IDs for all [`Resource`](crate::Resource)s found on any
     /// scope, pending from the server.
-    #[cfg(any(feature = "ssr", feature = "hydrate"))]
     pub(crate) fn pending_resources(&self) -> Vec<ResourceId> {
         self.resources
             .borrow()
@@ -1149,7 +1147,6 @@ impl Runtime {
             .collect()
     }
 
-    #[cfg(any(feature = "ssr", feature = "hydrate"))]
     pub(crate) fn serialization_resolvers(
         &self,
     ) -> FuturesUnordered<PinnedFuture<(ResourceId, String)>> {

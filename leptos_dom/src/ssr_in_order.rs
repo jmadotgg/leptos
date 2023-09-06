@@ -13,7 +13,7 @@ use itertools::Itertools;
 use leptos_reactive::{
     create_runtime, suspense::StreamChunk, Oco, RuntimeId, SharedContext,
 };
-use std::{borrow::Cow, collections::VecDeque};
+use std::{collections::VecDeque};
 
 /// Renders a view to HTML, waiting to return until all `async` [Resource](leptos_reactive::Resource)s
 /// loaded in `<Suspense/>` elements have finished loading.
@@ -306,7 +306,7 @@ impl View {
                         .attrs
                         .into_iter()
                         .filter_map(
-                            |(name, value)| -> Option<Cow<'static, str>> {
+                            |(name, value)| -> Option<Oco<'static, str>> {
                                 if value.is_empty() {
                                     Some(format!(" {name}").into())
                                 } else if name == "inner_html" {

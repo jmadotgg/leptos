@@ -723,7 +723,7 @@ pub(crate) trait ToMarker {
         &self,
         closing: bool,
         #[cfg(debug_assertions)] component_name: &str,
-    ) -> Cow<'static, str>;
+    ) -> Oco<'static, str>;
 }
 
 impl ToMarker for HydrationKey {
@@ -732,7 +732,7 @@ impl ToMarker for HydrationKey {
         &self,
         closing: bool,
         #[cfg(debug_assertions)] component_name: &str,
-    ) -> Cow<'static, str> {
+    ) -> Oco<'static, str> {
         #[cfg(debug_assertions)]
         {
             if component_name == "unit" {
@@ -761,7 +761,7 @@ impl ToMarker for Option<HydrationKey> {
         &self,
         closing: bool,
         #[cfg(debug_assertions)] component_name: &str,
-    ) -> Cow<'static, str> {
+    ) -> Oco<'static, str> {
         self.map(|key| {
             key.to_marker(
                 closing,

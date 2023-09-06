@@ -1,7 +1,4 @@
-#[cfg(all(
-    feature = "islands",
-    any(feature = "hydrate", feature = "ssr")
-))]
+#[cfg(feature = "islands")]
 use crate::SharedContext;
 #[cfg(debug_assertions)]
 use crate::SpecialNonReactiveZone;
