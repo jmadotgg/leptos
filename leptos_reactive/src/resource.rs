@@ -1,3 +1,8 @@
+#[cfg(all(
+    feature = "islands",
+    any(feature = "hydrate", feature = "ssr")
+))]
+use crate::SharedContext;
 #[cfg(debug_assertions)]
 use crate::SpecialNonReactiveZone;
 use crate::{
@@ -204,6 +209,8 @@ where
         version: Rc::new(Cell::new(0)),
         suspense_contexts: Default::default(),
         serializable,
+        #[cfg(feature = "islands")]
+        should_send_to_client: Default::default(),
     });
 
     let id = with_runtime(|runtime| {
@@ -335,6 +342,8 @@ where
         version: Rc::new(Cell::new(0)),
         suspense_contexts: Default::default(),
         serializable: ResourceSerialization::Local,
+        #[cfg(feature = "islands")]
+        should_send_to_client: Default::default(),
     });
 
     let id = with_runtime(|runtime| {
@@ -1078,6 +1087,8 @@ where
     version: Rc<Cell<usize>>,
     suspense_contexts: Rc<RefCell<HashSet<SuspenseContext>>>,
     serializable: ResourceSerialization,
+    #[cfg(feature = "islands")]
+    should_send_to_client: Rc<Cell<Option<bool>>>,
 }
 
 /// Whether and how the resource can be serialized.
@@ -1255,6 +1266,15 @@ where
             return;
         }
 
+        // if it's 1) in normal mode and is read, or
+        // 2) is in island mode and read in an island, tell it to ship
+        #[cfg(feature = "islands")]
+        if self.should_send_to_client.get().is_none()
+            && !SharedContext::no_hydrate()
+        {
+            self.should_send_to_client.set(Some(true));
+        }
+
         let version = self.version.get() + 1;
         self.version.set(version);
         self.scheduled.set(false);
@@ -1363,6 +1383,8 @@ pub(crate) trait SerializableResource {
         &self,
         id: ResourceId,
     ) -> Pin<Box<dyn Future<Output = (ResourceId, String)>>>;
+
+    fn should_send_to_client(&self) -> bool;
 }
 
 impl<S, T> SerializableResource for ResourceState<S, T>
@@ -1373,16 +1395,34 @@ where
     fn as_any(&self) -> &dyn Any {
         self
     }
+
     #[cfg_attr(
         any(debug_assertions, feature = "ssr"),
         instrument(level = "trace", skip_all,)
     )]
+    #[inline(always)]
     fn to_serialization_resolver(
         &self,
         id: ResourceId,
     ) -> Pin<Box<dyn Future<Output = (ResourceId, String)>>> {
         let fut = self.resource_to_serialization_resolver(id);
         Box::pin(fut)
+    }
+
+    #[cfg_attr(
+        any(debug_assertions, feature = "ssr"),
+        instrument(level = "trace", skip_all,)
+    )]
+    #[inline(always)]
+    fn should_send_to_client(&self) -> bool {
+        #[cfg(feature = "islands")]
+        {
+            self.should_send_to_client.get() == Some(true)
+        }
+        #[cfg(not(feature = "islands"))]
+        {
+            true
+        }
     }
 }
 

@@ -151,14 +151,23 @@ pub use leptos_config::{self, get_configuration, LeptosOptions};
     any(feature = "csr", feature = "hydrate")
 )))]
 /// Utilities for server-side rendering HTML.
+#[cfg(any(doc, feature = "ssr"))]
 pub mod ssr {
     pub use leptos_dom::{ssr::*, ssr_in_order::*};
 }
 pub use leptos_dom::{
-    self, create_node_ref, debug_warn, document, error, ev, helpers::*, html,
-    log, math, mount_to, mount_to_body, nonce, svg, warn, window, Attribute,
-    Class, CollectView, Errors, Fragment, HtmlElement, IntoAttribute,
-    IntoClass, IntoProperty, IntoStyle, IntoView, NodeRef, Property, View,
+    self, create_node_ref, debug_warn, document, error, ev,
+    helpers::{
+        event_target, event_target_checked, event_target_value,
+        request_animation_frame, request_animation_frame_with_handle,
+        request_idle_callback, request_idle_callback_with_handle, set_interval,
+        set_interval_with_handle, set_timeout, set_timeout_with_handle,
+        window_event_listener, window_event_listener_untyped,
+    },
+    html, log, math, mount_to, mount_to_body, mount_to_with_stop_hydrating,
+    nonce, svg, warn, window, Attribute, Class, CollectView, Errors, Fragment,
+    HtmlElement, IntoAttribute, IntoClass, IntoProperty, IntoStyle, IntoView,
+    NodeRef, Property, View,
 };
 
 /// Types to make it easier to handle errors in your application.
@@ -167,7 +176,7 @@ pub mod error {
 }
 #[cfg(not(any(target_arch = "wasm32", feature = "template_macro")))]
 pub use leptos_macro::view as template;
-pub use leptos_macro::{component, server, slot, view, Params};
+pub use leptos_macro::{component, island, server, slot, view, Params};
 pub use leptos_reactive::*;
 pub use leptos_server::{
     self, create_action, create_multi_action, create_server_action,
@@ -184,11 +193,18 @@ mod for_loop;
 mod show;
 pub use animated_show::*;
 pub use for_loop::*;
+#[cfg(feature = "islands")]
+pub use serde;
+#[cfg(feature = "islands")]
+pub use serde_json;
 pub use show::*;
 pub use suspense_component::*;
 mod suspense_component;
 mod text_prop;
 mod transition;
+// used by the component macro to generate islands
+#[doc(hidden)]
+pub use const_format;
 pub use text_prop::TextProp;
 #[cfg(any(debug_assertions, feature = "ssr"))]
 #[doc(hidden)]
@@ -200,6 +216,23 @@ pub use typed_builder;
 pub use typed_builder::Optional;
 #[doc(hidden)]
 pub use typed_builder_macro;
+#[doc(hidden)]
+#[cfg(any(
+    feature = "csr",
+    feature = "hydrate",
+    feature = "template_macro"
+))]
+pub use wasm_bindgen; // used in islands
+#[doc(hidden)]
+#[cfg(any(
+    feature = "csr",
+    feature = "hydrate",
+    feature = "template_macro"
+))]
+pub use web_sys; // used in islands
+// used by the component macro to generate islands
+#[doc(hidden)]
+pub use xxhash_rust;
 extern crate self as leptos;
 
 /// The most common type for the `children` property on components,
