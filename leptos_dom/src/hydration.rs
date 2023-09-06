@@ -264,6 +264,7 @@ impl HydrationCtx {
     }
 
     #[cfg(feature = "hydrate")]
+    #[allow(unused)]
     pub(crate) fn to_string(id: &HydrationKey, closing: bool) -> String {
         #[cfg(debug_assertions)]
         return format!("{id}{}", if closing { 'c' } else { 'o' });
