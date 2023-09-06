@@ -5,6 +5,8 @@ use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
 mod api;
+pub mod error_template;
+pub mod fallback;
 mod routes;
 use routes::{nav::*, stories::*, story::*, users::*};
 
@@ -13,7 +15,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/style.css"/>
+        <Stylesheet id="leptos" href="/pkg/hackernews.css"/>
         <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
         <Meta name="description" content="Leptos implementation of a HackerNews demo."/>
         <Router>

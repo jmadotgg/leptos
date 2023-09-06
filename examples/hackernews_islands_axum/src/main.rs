@@ -1,9 +1,10 @@
 #[cfg(feature = "ssr")]
 mod ssr_imports {
-    pub use axum::Router;
+    pub use axum::{routing::get, Router};
     pub use leptos::*;
     pub use leptos_axum::{generate_route_list, LeptosRoutes};
     pub use tower_http::{compression::CompressionLayer, services::ServeFile};
+    pub use hackernews::fallback::file_and_error_handler;
 }
 
 #[cfg(feature = "ssr")]
@@ -19,21 +20,9 @@ async fn main() {
 
     // build our application with a route
     let app = Router::new()
-        .route_service("/favicon.ico", ServeFile::new("./public/favicon.ico"))
-        .route_service(
-            "/style.css",
-            ServeFile::new("./pkg/style.css").precompressed_br(),
-        )
-        .route_service(
-            "/pkg/hackernews.js",
-            ServeFile::new("./pkg/hackernews.js").precompressed_br(),
-        )
-        .route_service(
-            "/pkg/hackernews_bg.wasm",
-            ServeFile::new("./pkg/hackernews_bg.wasm").precompressed_br(),
-        )
-        .leptos_routes(&leptos_options, routes, App)
-        //.layer(CompressionLayer::new())
+        .route("/favicon.ico", get(file_and_error_handler))
+        .leptos_routes(&leptos_options, routes, || view! {  <App/> } )
+        .fallback(file_and_error_handler)
         .with_state(leptos_options);
 
     // run our app with hyper
